@@ -2,20 +2,19 @@
 
 This repository contains an implementation of the paper [Deep One-Class Classification](http://proceedings.mlr.press/v80/ruff18a.html), an image anomaly classification method. 
 
-The original paper proposes its method to find anomalies on CIFAR10 and MNIST datasets, the authors also benchmark it on adversarial attacks. Here  I extend their work it to higher resolution datasets, like 128x128.
+The original paper proposes its method to find anomalies on CIFAR10 and MNIST datasets, the authors also benchmark it on adversarial attacks. Here, I extend their work to higher resolution datasets, like 128x128 pixels.
 
-Original Repo: https://github.com/lukasruff/Deep-SVDD-PyTorch
+Original Repo and implementation: https://github.com/lukasruff/Deep-SVDD-PyTorch
 
-# Deep SVD
+# Deep SVDD
 
-In this repo, I'll use the Deep SVDD is an anomaly classification for golden sample datasets. 
+In this repo, I'll use the Deep SVDD as an anomaly classification for golden sample datasets. 
 
-So if you have something that you need to classify when anomalies happen but you don't know the anomalies (i.e you only have good samples, bad samples rarely occur), this is a good Unsupervised setup and might suit you!
+So, if you have something that you need to classify when anomalies happen but you don't know the anomalies (i.e you only have good samples, bad samples rarely occur), this is a good Unsupervised setup and might suit you!
 
 ## Overview
 
-**Deep SVDD**: Learn a function that maps input space to a smaller vector space, classify if an input is anomalous or not in that smaller space.
-
+**Deep SVDD**: Deep Support Vector Data Description -> We use deep convolutional nets to learn a function that maps the input space into a smaller vector space, we want the non-anomalous points to be close to each other in that space, and its the convnet work to learn a function that map them close to each other, based on the most important characteristics of the class.
 
 **Objetive** : Train a model to the best representation of a dataset in a smaller vector space, then optimize a hypersphere that contains the samples of good data inside of it. At test time, everything outside the hypersphere will be considered an anomaly.
 
@@ -26,7 +25,7 @@ When we finish, we'll have a model, a hypersphere center C and its radius R in F
 # Training
 ## 1º Step
 
-We train a Deep Auto Encoder to reconstruct our dataset.
+We train a Deep Auto Encoder to reconstruct our dataset. If we have a good reconstruction, it means that our encoder has good features and thus, the bottleneck have a pretty good representation of our trained class.
 
 ## 2º Step
 We take only the Encoder part of our AutoEncoder, and its last convolutional layer as a latent space, which contains the smallest representation of our data (512 dimensions in my model).
