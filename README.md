@@ -12,6 +12,18 @@ In this repo, I'll use the Deep SVDD is an anomaly classification for golden sam
 
 So if you have something that you need to classify when anomalies happen but you don't know the anomalies (i.e you only have good samples, bad samples rarely occur), this is a good Unsupervised setup and might suit you!
 
+## Overview
+
+**Deep SVDD**: Learn a function that maps input space to a smaller vector space, classify if an input is anomalous or not in that smaller space.
+
+
+**Objetive** : Train a model to the best representation of a dataset in a smaller vector space, then optimize a hypersphere that contains the samples of good data inside of it. At test time, everything outside the hypersphere will be considered an anomaly.
+
+![image](https://user-images.githubusercontent.com/56324869/178617483-5068461d-7fe5-41ca-a6a2-3122de27f626.png)
+
+When we finish, we'll have a model, a hypersphere center C and its radius R in F vector space.
+
+# Training
 ## 1º Step
 
 We train a Deep Auto Encoder to reconstruct our dataset.
