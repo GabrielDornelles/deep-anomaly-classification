@@ -34,7 +34,7 @@ def init_center_c(train_loader: DataLoader, net: object, eps=0.1, device=torch.d
     with torch.no_grad():
         for data in train_loader:
             # get the inputs of the batch
-            inputs, _, _ = data
+            inputs, _ = data
             inputs = inputs.to(device)
             outputs = net(inputs)
             n_samples += outputs.shape[0]
@@ -68,7 +68,7 @@ def train_ae(model, optimizer, train_loader, device = torch.device("cuda"), epoc
         n_batches = 0
         
         for data in train_loader:
-            x, _, _ = data
+            x, _ = data
             x = x.to(device)
 
             optimizer.zero_grad()
@@ -83,7 +83,7 @@ def train_ae(model, optimizer, train_loader, device = torch.device("cuda"), epoc
             n_batches +=1
 
         epoch_loss = loss_epoch/n_batches
-        print(f"Epoch {epoch+1}/{epoches}           Loss: {epoch_loss}")
+        print(f"Epoch {epoch+1}/{epoches}           Loss: {epoch_loss:.3f}")
         if epoch_loss < lowest_loss:
             lowest_loss = epoch_loss
             best_weights = copy.deepcopy(model.state_dict())
@@ -121,7 +121,7 @@ def train_encoder(net, train_loader, optimizer, scheduler, lr_milestones, normal
         epoch_start_time = time.time()
         
         for data in train_loader:
-            inputs, _, _ = data
+            inputs, _ = data
             inputs = inputs.to(device)
 
             # Zero the network parameter gradients
@@ -158,7 +158,7 @@ def train_encoder(net, train_loader, optimizer, scheduler, lr_milestones, normal
 
         # log epoch statistics
         epoch_train_time = time.time() - epoch_start_time
-        print('  Epoch {}/{}\t Batch inference Time: {:.3f}\t Loss: {:.8f}'
+        print('  Epoch {}/{}\t Batch inference Time: {:.3f}\t Loss: {:.3f}'
                     .format(epoch + 1, n_epochs, epoch_train_time, loss_epoch / n_batches))
 
     train_time = time.time() - start_time
