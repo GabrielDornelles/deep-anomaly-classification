@@ -12,72 +12,76 @@ In this repo, I'll use the Deep SVDD as an anomaly classification for golden sam
 
 So, if you have something that you need to classify when anomalies happen but you don't know the anomalies (i.e you only have good samples, bad samples rarely occur), this is a good Unsupervised setup and might suit you!
 
-## Overview
+# Deep Support Vector Data Description (Deep SVDD)
 
-**Deep SVDD**: Deep Support Vector Data Description -> We use deep convolutional nets to learn a function that maps the input space into a smaller vector space, we want the non-anomalous points to be close to each other in that space, and its the convnet work to learn a function that map them close to each other, based on the most important characteristics of the class.
+Deep SVDD is a method that utilizes deep convolutional neural networks to learn a function that maps the input space into a smaller vector space. The goal is to make non-anomalous points close to each other in that space. The convolutional neural network learns to map these points close to each other based on the most important characteristics of the class.
 
-**Objetive** : Train a model to the best representation of a dataset in a smaller vector space, then optimize a hypersphere that contains the samples of good data inside of it. At test time, everything outside the hypersphere will be considered an anomaly.
+![Deep SVDD](https://user-images.githubusercontent.com/56324869/178617483-5068461d-7fe5-41ca-a6a2-3122de27f626.png)
 
-![image](https://user-images.githubusercontent.com/56324869/178617483-5068461d-7fe5-41ca-a6a2-3122de27f626.png)
+## Objective
 
-When we finish, we'll have a model, a hypersphere center C and its radius R in F vector space.
+The main objective of Deep SVDD is to train a model to find the best representation of a dataset in a smaller vector space. It then optimizes a hypersphere that contains the samples of good data inside it. During testing, everything outside the hypersphere is considered an anomaly.
 
-# Training
-## 1º Step
+## Training
 
-We train a Deep Auto Encoder to reconstruct our dataset. If we have a good reconstruction, it means that our encoder has good features and thus, the bottleneck have a pretty good representation of our trained class.
+### Step 1: Deep Auto Encoder Training
 
-## 2º Step
-We take only the Encoder part of our AutoEncoder, and its last convolutional layer as a latent space, which contains the smallest representation of our data (512 dimensions in my model).
+In the first step, we train a Deep Auto Encoder to reconstruct our dataset. A good reconstruction implies that the encoder has learned good features, and the bottleneck has a strong representation of the trained class.
 
-## 3º Step
-We create a 512d vector and calculate the mean of our dataset at the latent dimension (last conv layer). We use it as the center of our 512d hypersphere.
+### Step 2: Latent Space Extraction
 
-## 4º Step
-We optimize the hypersphere radius in such a way that in the end we have a 512d hypersphere that contains our good samples inside of it.
+In the second step, we take only the encoder part of our AutoEncoder and its last convolutional layer as a latent space, which contains the smallest representation of our data (typically 512 dimensions).
 
-## 5º Step
-We simply forward new images through our encoder, it outputs a 512d vector (the image in the latent space), then we simply check whether that 512d point is inside the hypersphere or not.
+### Step 3: Hypersphere Center Calculation
 
-Scores smaller than 0 are considered inside of our hypersphere, whereas scores higher than 0 are anomalies.
+We create a 512-dimensional vector and calculate the mean of our dataset at the latent dimension (last conv layer). This mean serves as the center of our 512-dimensional hypersphere.
 
-## Results:
+### Step 4: Hypersphere Radius Optimization
 
-I've trained the golden sample image with 199 augmentations (noise, contrasts, and other augmentations that dont change the core of our class).
+In this step, we optimize the hypersphere radius to ensure it contains our good samples inside it.
 
-Ideally, we should be able to get negative scores for our good samples, but that doesnt happen everytime, instead, we have really small values as the output, like 0.0x or 0.x, which deppends on the training (I've got it right sometimes, it deppends on training and hyperparameters, and specially, on data).
+### Step 5: Anomaly Detection
 
-### Golden sample:
+To detect anomalies, we forward new images through our encoder, which outputs a 512-dimensional vector (the image in the latent space). We check whether this 512-dimensional point is inside the hypersphere or not. Scores smaller than 0 are considered inside the hypersphere, while scores higher than 0 are anomalies.
 
-![89](https://user-images.githubusercontent.com/56324869/178614325-abac2fcf-e48e-4544-a330-58ec3677a4aa.jpg)
+## Results
 
-Score:  0.01209
+The results can vary based on training and data, and ideal outcomes should involve negative scores for good samples. However, it's common to have very small values as the output. Also, Its recommended to apply some augmentations to help the model not overfit your data (it will happen if you train with 1 or 2 images).
 
-### Darker
+### Example Results:
 
-![89 jpg-augmentation-20](https://user-images.githubusercontent.com/56324869/178614337-a6621e99-14b2-4b1f-b442-c40b69135176.jpg)
+| Image | Score |
+|-------|-------|
+| ![Golden Sample](https://user-images.githubusercontent.com/56324869/178614325-abac2fcf-e48e-4544-a330-58ec3677a4aa.jpg) | 0.012 |
+| ![Darker](https://user-images.githubusercontent.com/56324869/178614337-a6621e99-14b2-4b1f-b442-c40b69135176.jpg) | 0.11 |
+| ![Handmade Defects](https://user-images.githubusercontent.com/56324869/178614356-3b674bd6-43d4-4e4f-89ab-593e55494c08.jpg) | 32.15 |
+| ![Shifted Painting](https://user-images.githubusercontent.com/56324869/178614360-a0cfafed-a23a-49c4-9f55-cec9a2906f93.jpg) | 159.10 |
+| ![F12 Instead of F8](https://user-images.githubusercontent.com/56324869/178614361-e9be41e2-a95f-44de-bcc4-7ab2e43aa804.jpg) | 2.33 |
 
-Score: 0.11798178584807317
-
-### Handmade defects:
-
-![f8-anomalous](https://user-images.githubusercontent.com/56324869/178614356-3b674bd6-43d4-4e4f-89ab-593e55494c08.jpg)
-
-Score: 32.154
-
-### Shifted painting
-
-![f8-moved](https://user-images.githubusercontent.com/56324869/178614360-a0cfafed-a23a-49c4-9f55-cec9a2906f93.jpg)
-
-Score: 159.10847383172745
-
-### F12 instead of F8 written
-
-![f8-small-defect](https://user-images.githubusercontent.com/56324869/178614361-e9be41e2-a95f-44de-bcc4-7ab2e43aa804.jpg)
-
-Score: 2.3384528699659626
 
 ## Citation
 
 I'am a research engineer, so I don't really write papers on the subject, instead I write the models and make them work on real world scenarios. 
 If you find that repository useful, please make a reference to it!
+
+```bibtex
+# Original Author
+@InProceedings{pmlr-v80-ruff18a,
+  title     = {Deep One-Class Classification},
+  author    = {Ruff, Lukas and Vandermeulen, Robert A. and G{\"o}rnitz, Nico and Deecke, Lucas and Siddiqui, Shoaib A. and Binder, Alexander and M{\"u}ller, Emmanuel and Kloft, Marius},
+  booktitle = {Proceedings of the 35th International Conference on Machine Learning},
+  pages     = {4393--4402},
+  year      = {2018},
+  volume    = {80},
+}
+
+# Mine
+@misc{deep-anomaly-classification,
+  title={Deep Anomaly Classification},
+  author={Gabriel Dornelles Monteiro},
+  year={2022},
+  howpublished={GitHub Repository},
+  url={https://github.com/GabrielDornelles/deep-anomaly-classification},
+}
+
+```
